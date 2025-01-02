@@ -1,44 +1,26 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { GmailAccountManager } from '@/lib/gmail/accounts'
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url)
-  const userId = searchParams.get('userId')
-  const days = parseInt(searchParams.get('days') || '30')
-
-  if (!userId) {
-    return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
-  }
-
+export async function GET() {
   try {
-    // Find statement entries without receipts
-    const missingReceipts = await prisma.statementEntry.findMany({
+    const expenses = await prisma.expense.findMany({
       where: {
-        userId,
-        receipt: null,
-        date: {
-          gte: new Date(Date.now() - days * 24 * 60 * 60 * 1000)
-        }
+        receipt: null
       },
       orderBy: {
         date: 'desc'
+      },
+      include: {
+        receipt: true
       }
     })
 
-    // Try to find matching receipts in Gmail
-    const accountManager = new GmailAccountManager()
-    const searchResults = await accountManager.findMissingReceipts(
-      userId,
-      missingReceipts
-    )
-
-    return NextResponse.json({
-      missing: missingReceipts,
-      found: searchResults
-    })
+    return NextResponse.json(expenses)
   } catch (error) {
-    console.error('Missing receipts search error:', error)
-    return NextResponse.json({ error: 'Search failed' }, { status: 500 })
+    console.error('API Error:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch expenses' },
+      { status: 500 }
+    )
   }
 } 

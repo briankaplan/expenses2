@@ -1,10 +1,21 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    serverActions: true,
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '*.r2.dev',
+        pathname: '/**',
+      }
+    ],
   },
   webpack: (config) => {
-    config.externals = [...(config.externals || []), 'canvas', 'jsdom']
+    // Required for Cloudflare Workers
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      "crypto": require.resolve("crypto-browserify"),
+      "stream": require.resolve("stream-browserify"),
+    }
     return config
   },
 }

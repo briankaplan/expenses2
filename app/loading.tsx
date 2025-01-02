@@ -1,17 +1,9 @@
 import { Skeleton } from '@/components/ui/skeleton'
 
-export default function GlobalLoading() {
+export default function Loading() {
   return (
-    <div className="container py-8 space-y-8">
-      <div className="space-y-4">
-        <Skeleton className="h-8 w-[200px]" />
-        <Skeleton className="h-4 w-[300px]" />
-      </div>
-      <div className="space-y-4">
-        <Skeleton className="h-24 w-full" />
-        <Skeleton className="h-24 w-full" />
-        <Skeleton className="h-24 w-full" />
-      </div>
+    <div className="flex min-h-screen items-center justify-center">
+      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
     </div>
   )
 } 

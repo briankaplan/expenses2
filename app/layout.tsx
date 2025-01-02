@@ -1,18 +1,18 @@
 import { Inter } from 'next/font/google'
 import { AppShell } from '@/components/layout/AppShell'
 import { ThemeProvider } from '@/components/theme/ThemeProvider'
+import { Toaster } from '@/components/ui/toaster'
 import { cn } from '@/lib/utils'
 import './globals.css'
-import Script from 'next/script'
+import { AuthProvider } from '@/lib/auth-context'
+import { AuthLayout } from '@/components/auth/auth-layout'
+import { UserMenu } from '@/components/auth/user-menu'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
   title: 'E34A Dashboard',
   description: 'Financial statement and receipt management dashboard',
-  icons: {
-    icon: '/favicon.ico',
-  },
 }
 
 export default function RootLayout({
@@ -22,12 +22,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <Script
-          src="https://cdn.teller.io/connect/connect.js"
-          strategy="beforeInteractive"
-        />
-      </head>
       <body className={cn(
         'min-h-screen bg-background font-sans antialiased',
         inter.className
@@ -38,9 +32,14 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AppShell>
-            {children}
-          </AppShell>
+          <AuthProvider>
+            <AppShell>
+              <AuthLayout>
+                {children}
+              </AuthLayout>
+            </AppShell>
+            <Toaster />
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

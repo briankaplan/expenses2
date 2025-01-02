@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 
-export default function RootError({
+export default function Error({
   error,
   reset,
 }: {
@@ -11,18 +11,18 @@ export default function RootError({
   reset: () => void
 }) {
   useEffect(() => {
-    console.error('Root error:', error)
+    console.error('Application error:', error)
   }, [error])
 
   return (
-    <div className="flex h-screen flex-col items-center justify-center gap-4">
-      <div className="text-center">
-        <h2 className="text-lg font-semibold">Something went wrong!</h2>
-        <p className="text-sm text-muted-foreground">
+    <div className="flex min-h-screen items-center justify-center">
+      <div className="text-center space-y-4">
+        <h2 className="text-2xl font-bold">Something went wrong!</h2>
+        <p className="text-muted-foreground">
           {error.message || 'An unexpected error occurred'}
         </p>
+        <Button onClick={() => reset()}>Try again</Button>
       </div>
-      <Button onClick={reset}>Try again</Button>
     </div>
   )
 } 

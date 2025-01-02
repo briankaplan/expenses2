@@ -1,96 +1,47 @@
-'use client'
-
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { DataTable } from '@/components/ui/data-table'
-
-interface Expense {
-  id: string
-  date: string
-  description: string
-  category: string
-  amount: number
-  hasReceipt: boolean
-}
-
-const columns = [
-  {
-    accessorKey: 'date',
-    header: 'Date',
-  },
-  {
-    accessorKey: 'description',
-    header: 'Description',
-  },
-  {
-    accessorKey: 'category',
-    header: 'Category',
-  },
-  {
-    accessorKey: 'amount',
-    header: 'Amount',
-    cell: ({ row }) => {
-      return <div className="font-medium">
-        ${row.original.amount.toFixed(2)}
-      </div>
-    }
-  },
-  {
-    accessorKey: 'hasReceipt',
-    header: 'Receipt',
-    cell: ({ row }) => {
-      return <div className={row.original.hasReceipt ? 'text-green-500' : 'text-red-500'}>
-        {row.original.hasReceipt ? '✓' : '✗'}
-      </div>
-    }
-  }
-]
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ExpenseList } from '@/components/expenses/expense-list'
+import { FastViewer } from '@/components/expenses/fast-viewer'
+import { ExpenseStats } from '@/components/expenses/expense-stats'
 
 export default function ExpensesPage() {
-  const [period, setPeriod] = useState('month')
-
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Expenses</h1>
-        <div className="flex gap-2">
-          <Button 
-            variant={period === 'month' ? 'default' : 'ghost'}
-            onClick={() => setPeriod('month')}
-          >
-            Month
-          </Button>
-          <Button 
-            variant={period === 'year' ? 'default' : 'ghost'}
-            onClick={() => setPeriod('year')}
-          >
-            Year
-          </Button>
-        </div>
-      </div>
-      
-      <div className="grid gap-4">
-        <div className="rounded-lg border bg-card p-4">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="font-semibold">Recent Expenses</h2>
-            <Button variant="outline" size="sm">Export</Button>
-          </div>
-          <DataTable 
-            columns={columns}
-            data={[]} // Add your expense data here
-          />
-        </div>
-        
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-lg border bg-card p-4">
-            <h2 className="font-semibold mb-4">Expense Categories</h2>
-            {/* Add categories chart here */}
-          </div>
-          <div className="rounded-lg border bg-card p-4">
-            <h2 className="font-semibold mb-4">Monthly Trend</h2>
-            {/* Add trend chart here */}
+    <div className="container py-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold">Expenses</h1>
+            <p className="text-muted-foreground">
+              Manage and track your expenses
+            </p>
           </div>
         </div>
+
+        <ExpenseStats />
+
+        <Tabs defaultValue="all">
+          <TabsList>
+            <TabsTrigger value="all">All Expenses</TabsTrigger>
+            <TabsTrigger value="business">Business</TabsTrigger>
+            <TabsTrigger value="personal">Personal</TabsTrigger>
+            <TabsTrigger value="uncategorized">Uncategorized</TabsTrigger>
+            <TabsTrigger value="missing-receipts">Missing Receipts</TabsTrigger>
+          </TabsList>
+          <TabsContent value="all">
+            <ExpenseList />
+          </TabsContent>
+          <TabsContent value="business">
+            <ExpenseList filter="business" />
+          </TabsContent>
+          <TabsContent value="personal">
+            <ExpenseList filter="personal" />
+          </TabsContent>
+          <TabsContent value="uncategorized">
+            <FastViewer />
+          </TabsContent>
+          <TabsContent value="missing-receipts">
+            <ExpenseList filter="missing-receipts" />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   )

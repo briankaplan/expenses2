@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server'
-import { uploadFile } from '@/lib/storage'
 import { prisma } from '@/lib/db'
+import { uploadToR2 } from '@/lib/r2'
 
 export async function POST(request: Request) {
   try {
     const formData = await request.formData()
-    const file = formData.get('file') as File | null
+    const file = formData.get('file') as File
+    const source = formData.get('source') as string
 
     if (!file) {
       return NextResponse.json(
@@ -14,36 +15,25 @@ export async function POST(request: Request) {
       )
     }
 
-    if (!file.type.includes('pdf')) {
-      return NextResponse.json(
-        { error: 'Only PDF files are allowed' },
-        { status: 400 }
-      )
-    }
+    // Upload to R2
+    const fileUrl = await uploadToR2(file, 'statements')
 
-    // Upload file to S3
-    const fileUrl = await uploadFile(file, 'statements')
-
-    // Save to database
+    // Create statement record
     const statement = await prisma.statement.create({
       data: {
-        fileName: file.name,
         fileUrl,
+        fileName: file.name,
+        fileSize: file.size,
+        mimeType: file.type,
+        source
       }
     })
 
-    return NextResponse.json({
-      message: 'Statement uploaded successfully',
-      statement: {
-        id: statement.id,
-        fileName: statement.fileName,
-        uploadedAt: statement.uploadedAt,
-      }
-    })
+    return NextResponse.json(statement)
   } catch (error) {
-    console.error('Statement upload error:', error)
+    console.error('Upload error:', error)
     return NextResponse.json(
-      { error: 'Error uploading statement' },
+      { error: 'Failed to upload statement' },
       { status: 500 }
     )
   }
